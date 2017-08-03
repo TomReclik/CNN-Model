@@ -56,7 +56,7 @@ def CCIFC(x_train, y_train, x_test, y_test):
 
     return score
 
-def SCFN(x_train, y_train, x_test, y_test):
+def SCFN(x_train, y_train, x_test, y_test, channels, dropout, dense):
     """
     Convolutional Network with:
         - 6 Normal convolutional layers
@@ -65,24 +65,24 @@ def SCFN(x_train, y_train, x_test, y_test):
 
     model = Sequential()
 
-    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
-    model.add(Conv2D(32, (3, 3), activation='relu'))
+    model.add(Conv2D(channels[0], (3, 3), activation='relu', input_shape=(32, 32, 3)))
+    model.add(Conv2D(channels[0], (3, 3), activation='relu'))
     #model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.2))
+    model.add(Dropout(dropout[0]))
 
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(Conv2D(channels[1], (3, 3), activation='relu'))
+    model.add(Conv2D(channels[1], (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.3))
+    model.add(Dropout(dropout[1]))
 
-    model.add(Conv2D(128, (3, 3), activation='relu'))
-    model.add(Conv2D(128, (3, 3), activation='relu'))
+    model.add(Conv2D(channels[2], (3, 3), activation='relu'))
+    model.add(Conv2D(channels[2], (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.4))
+    model.add(Dropout(dropout[2]))
 
     model.add(Flatten())
-    model.add(Dense(256, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dense(dense, activation='relu'))
+    model.add(Dropout(dropout[3]))
     model.add(Dense(5, activation='softmax'))
 
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -102,8 +102,8 @@ def FCFN(x_train, y_train, x_test, y_test):
 
     model = Sequential()
 
-    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
-    model.add(Conv2D(32, (3, 3), activation='relu'))
+    model.add(Conv2D(64, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
     #model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
 
@@ -121,6 +121,35 @@ def FCFN(x_train, y_train, x_test, y_test):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     model.fit(x_train, y_train, batch_size=32, epochs=100)
+    score = model.evaluate(x_test, y_test, batch_size=32)
+
+    return score
+
+def TCFN(x_train, y_train, x_test, y_test, channels):
+    """
+    Convolutional Network with:
+        - 4 Normal convolutional layers
+        - 1 Fully connected output layer
+    """
+
+    model = Sequential()
+
+    model.add(Conv2D(channels[0], (3, 3), activation='relu', input_shape=(32, 32, 3)))
+    model.add(Conv2D(channels[1], (3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Flatten())
+    model.add(Dense(64, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(5, activation='softmax'))
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    model.fit(x_train, y_train, batch_size=50, epochs=25)
     score = model.evaluate(x_test, y_test, batch_size=32)
 
     return score
