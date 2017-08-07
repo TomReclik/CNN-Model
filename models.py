@@ -65,11 +65,11 @@ def TIOSM(x_train, y_train, x_test, y_test):
 
     inputs = Input(shape=(32, 32, 3))
 
-    tower_1 = Conv2D(160, (1, 1), padding='same', activation='relu')(inputs)
-    tower_1 = Conv2D(96, (3, 3), padding='same', activation='relu')(tower_1)
+    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(inputs)
+    tower_1 = Conv2D(64, (3, 3), padding='same', activation='relu')(tower_1)
 
-    tower_2 = Conv2D(160, (1, 1), padding='same', activation='relu')(inputs)
-    tower_2 = Conv2D(192, (5, 5), padding='same', activation='relu')(tower_2)
+    tower_2 = Conv2D(64, (1, 1), padding='same', activation='relu')(inputs)
+    tower_2 = Conv2D(64, (5, 5), padding='same', activation='relu')(tower_2)
 
     tower_3 = MaxPooling2D((3, 3), strides=(2, 2), padding='same')(inputs)
     tower_3 = Conv2D(64, (1, 1), padding='same', activation='relu')(tower_3)
@@ -78,11 +78,11 @@ def TIOSM(x_train, y_train, x_test, y_test):
 
     x = Dropout(0.5)(inception)
 
-    tower_1 = Conv2D(160, (1, 1), padding='same', activation='relu')(x)
-    tower_1 = Conv2D(96, (3, 3), padding='same', activation='relu')(tower_1)
+    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
+    tower_1 = Conv2D(64, (3, 3), padding='same', activation='relu')(tower_1)
 
-    tower_2 = Conv2D(160, (1, 1), padding='same', activation='relu')(x)
-    tower_2 = Conv2D(192, (5, 5), padding='same', activation='relu')(tower_2)
+    tower_2 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
+    tower_2 = Conv2D(64, (5, 5), padding='same', activation='relu')(tower_2)
 
     tower_3 = MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
     tower_3 = Conv2D(64, (1, 1), padding='same', activation='relu')(tower_3)
