@@ -86,4 +86,4 @@ for SIZE in range(5000,6000,5000):
 
 with open('score.dat','w') as outfile:
     for i in range(len(score)):
-        outfile.write(score[i][0], "    ", score[i][1])
+        outfile.write(str(score[i][0]) + "    " + str(score[i][1]))
