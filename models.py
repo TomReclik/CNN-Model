@@ -71,7 +71,7 @@ def TIOSM(x_train, y_train, x_test, y_test):
     tower_2 = Conv2D(64, (1, 1), padding='same', activation='relu')(inputs)
     tower_2 = Conv2D(64, (5, 5), padding='same', activation='relu')(tower_2)
 
-    tower_3 = MaxPooling2D((3, 3), strides=(2, 2), padding='same')(inputs)
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(inputs)
     tower_3 = Conv2D(64, (1, 1), padding='same', activation='relu')(tower_3)
 
     inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
@@ -84,7 +84,7 @@ def TIOSM(x_train, y_train, x_test, y_test):
     tower_2 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
     tower_2 = Conv2D(64, (5, 5), padding='same', activation='relu')(tower_2)
 
-    tower_3 = MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(x)
     tower_3 = Conv2D(64, (1, 1), padding='same', activation='relu')(tower_3)
 
     inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
