@@ -94,5 +94,5 @@ Different combinations of parameters
 #     score = models.TCFN(x_train, y_train, x_test, y_test, channels[i])
 #     print score
 
-score = models.TIOSM(x_train, y_train, x_test, y_test)
+score = models.EERACN(x_train, y_train, x_test, y_test)
 print score
