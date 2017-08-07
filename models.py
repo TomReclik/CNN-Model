@@ -110,7 +110,7 @@ def TIOSM(x_train, y_train, x_test, y_test):
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
-    model.fit(x_train, y_train, batch_size=40, epochs=100)
+    model.fit(x_train, y_train, batch_size=40, epochs=10)
 
     score = model.evaluate(x_test, y_test, batch_size=500)
 
