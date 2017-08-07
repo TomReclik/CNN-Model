@@ -19,7 +19,7 @@ labels = [0,1,2,3,4]
 
 score = []
 
-for SIZE in range(5000,11000,5000):
+for SIZE in range(5000,26000,5000):
     TRAININGSIZE    = SIZE
     TESTSIZE        = SIZE/10
 
