@@ -124,9 +124,9 @@ Network
 
     inputs = Input(shape=(32, 32, 3))
 
-    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(inputs)
-    tower_2 = Conv2D(64, (3, 3), padding='same', activation='relu')(inputs)
-    tower_3 = Conv2D(64, (5, 5), padding='same', activation='relu')(inputs)
+    tower_1 = Conv2D(100, (1, 1), padding='same', activation='relu')(inputs)
+    tower_2 = Conv2D(100, (3, 3), padding='same', activation='relu')(inputs)
+    tower_3 = Conv2D(100, (5, 5), padding='same', activation='relu')(inputs)
 
     inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
 
@@ -134,9 +134,9 @@ Network
 
     x = MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
 
-    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
-    tower_2 = Conv2D(64, (3, 3), padding='same', activation='relu')(x)
-    tower_3 = Conv2D(64, (5, 5), padding='same', activation='relu')(x)
+    tower_1 = Conv2D(100, (1, 1), padding='same', activation='relu')(x)
+    tower_2 = Conv2D(100, (3, 3), padding='same', activation='relu')(x)
+    tower_3 = Conv2D(100, (5, 5), padding='same', activation='relu')(x)
 
     inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
 
@@ -144,9 +144,9 @@ Network
 
     x = MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
 
-    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
-    tower_2 = Conv2D(64, (3, 3), padding='same', activation='relu')(x)
-    tower_3 = Conv2D(64, (8, 8), padding='same', activation='relu')(x)
+    tower_1 = Conv2D(100, (1, 1), padding='same', activation='relu')(x)
+    tower_2 = Conv2D(100, (3, 3), padding='same', activation='relu')(x)
+    tower_3 = Conv2D(100, (8, 8), padding='same', activation='relu')(x)
 
     inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
 
