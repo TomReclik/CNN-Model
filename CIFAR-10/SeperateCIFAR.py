@@ -13,8 +13,8 @@ def unpickle(file):
 # INPUTPATH     : Path to data
 #
 
-TRAININGSIZE    = 5000
-TESTSIZE        = 500
+TRAININGSIZE    = 50000
+TESTSIZE        = 5000
 INPUTPATH       = os.getcwd()
 
 labels = [0,1,2,3,4]
@@ -23,14 +23,14 @@ labels = [0,1,2,3,4]
 # Seperate training data
 #
 
+x_train = []
+y_train = []
+
 for f in range(1,6):
     train = unpickle(INPUTPATH + "/data_batch_" + str(f))
 
     x = train["data"]
     y = train["labels"]
-
-    x_train = []
-    y_train = []
 
     for i in range(len(y)):
         if(len(y_train)==TRAININGSIZE):
@@ -76,3 +76,6 @@ test = {"data": x_test, "labels": y_test}
 
 with open('test','w') as outfile:
     cPickle.dump(test, outfile)
+
+print("Training size: ", len(x_train))
+print("Test size:", len(x_test))
