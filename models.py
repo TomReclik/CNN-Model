@@ -56,6 +56,66 @@ def CCIFC(x_train, y_train, x_test, y_test):
 
     return score
 
+def TIOSM(x_train, y_train, x_test, y_test):
+    """
+    Convolutional Network with:
+        - 3 Inception layer
+        - 1 Fully connected softmax output layer
+    """
+
+    inputs = Input(shape=(32, 32, 3))
+
+    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(inputs)
+    tower_1 = Conv2D(64, (3, 3), padding='same', activation='relu')(tower_1)
+
+    tower_2 = Conv2D(64, (1, 1), padding='same', activation='relu')(inputs)
+    tower_2 = Conv2D(64, (5, 5), padding='same', activation='relu')(tower_2)
+
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(inputs)
+    tower_3 = Conv2D(64, (1, 1), padding='same', activation='relu')(tower_3)
+
+    inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
+
+    x = Dropout(0.5)(inception)
+
+    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
+    tower_1 = Conv2D(64, (3, 3), padding='same', activation='relu')(tower_1)
+
+    tower_2 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
+    tower_2 = Conv2D(64, (5, 5), padding='same', activation='relu')(tower_2)
+
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(x)
+    tower_3 = Conv2D(64, (1, 1), padding='same', activation='relu')(tower_3)
+
+    inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
+
+    x = Dropout(0.5)(inception)
+
+    tower_1 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
+    tower_1 = Conv2D(64, (3, 3), padding='same', activation='relu')(tower_1)
+
+    tower_2 = Conv2D(64, (1, 1), padding='same', activation='relu')(x)
+    tower_2 = Conv2D(64, (5, 5), padding='same', activation='relu')(tower_2)
+
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(x)
+    tower_3 = Conv2D(64, (1, 1), padding='same', activation='relu')(tower_3)
+
+    inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
+
+    x = Flatten()(x)
+    outputs= Dense(5, activation='softmax')(x)
+
+    model = Model(inputs=inputs, outputs=outputs)
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    model.fit(x_train, y_train, batch_size=40, epochs=100)
+
+    score = model.evaluate(x_test, y_test, batch_size=500)
+
+    return score
+
 def SCFN(x_train, y_train, x_test, y_test, channels, dropout, dense):
     """
     Convolutional Network with:

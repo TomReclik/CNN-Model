@@ -88,8 +88,11 @@ Different combinations of parameters
 #             [64,32],
 #             [64,64]]
 
-channels = [[32,64]]
+# channels = [[32,64]]
+#
+# for i in range(len(channels)):
+#     score = models.TCFN(x_train, y_train, x_test, y_test, channels[i])
+#     print score
 
-for i in range(len(channels)):
-    score = models.TCFN(x_train, y_train, x_test, y_test, channels[i])
-    print score
+score = models.TIOSM(x_train, y_train, x_test, y_test)
+print score
