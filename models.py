@@ -298,21 +298,21 @@ def Graham(x_train, y_train, x_test, y_test):
 
     model.add(Conv2D(320, (3,3), input_shape=(32,32,3)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
-    model.add(Conv2D(320, (2,2))
+    model.add(Conv2D(320, (2,2)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
 
     model.add(Dropout(0.2))
 
-    model.add(Conv2D(640, (3,3))
+    model.add(Conv2D(640, (3,3)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
 
     model.add(Dropout(0.3))
 
-    model.add(Conv2D(960, (3,3))
+    model.add(Conv2D(960, (3,3)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
