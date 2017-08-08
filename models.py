@@ -1,7 +1,7 @@
 import keras
 from keras.models import Model
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Activation, Input
+from keras.layers import Dense, Dropout, Flatten, Activation, Input, advanced_activations
 from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
@@ -252,6 +252,75 @@ def TCFN(x_train, y_train, x_test, y_test, channels):
     model.add(Dropout(0.5))
     model.add(Dense(64, activation='relu'))
     model.add(Dropout(0.5))
+    model.add(Dense(5, activation='softmax'))
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    model.fit(x_train, y_train, batch_size=50, epochs=25)
+    score = model.evaluate(x_test, y_test, batch_size=32)
+
+    return score
+
+def Lenet(x_train, y_train, x_test, y_test):
+    """
+    The Lenet convolutional network
+    """
+
+    model = Sequential()
+
+    model.add(Conv2D(20, (5,5), activation='relu', input_shape=(32,32,3)))
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    model.add(Conv2D(50, (5,5), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    model.add(Flatten())
+    model.add(Dense(500, activation='relu'))
+
+    model.add(Dense(5, activation='softmax'))
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    model.fit(x_train, y_train, batch_size=50, epochs=25)
+    score = model.evaluate(x_test, y_test, batch_size=32)
+
+    return score
+
+def Graham(x_train, y_train, x_test, y_test):
+    """
+    http://blog.kaggle.com/2015/01/02/cifar-10-competition-winners-interviews-with-dr-ben-graham-phil-culliton-zygmunt-zajac/
+    without sparsity
+    """
+
+    model = Sequential()
+
+    model.add(Conv2D(320, (3,3), input_shape=(32,32,3)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+    model.add(Conv2D(320, (2,2))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    model.add(Dropout(0.2))
+
+    model.add(Conv2D(640, (3,3))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    model.add(Dropout(0.3))
+
+    model.add(Conv2D(960, (3,3))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    model.add(Dropout(0.4))
+
+    model.add(Flatten())
+
     model.add(Dense(5, activation='softmax'))
 
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
