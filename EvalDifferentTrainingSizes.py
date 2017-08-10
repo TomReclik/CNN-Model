@@ -3,6 +3,7 @@ import cPickle
 import os
 import keras
 import json
+import tensorflow as tf
 
 import models
 
@@ -10,6 +11,11 @@ def unpickle(file):
     with open(file, 'rb') as fo:
         dict = cPickle.load(fo)
     return dict
+
+flags = tf.app.flags
+flags.DEFINE_string('CenterGrayScale', 'True', 'Center the gray scale to the interval -1,1. Bool.')
+
+FLAGS = flags.FLAGS
 
 """
 Get data
@@ -22,7 +28,7 @@ score = []
 for SIZE in range(5000,26000,5000):
     TRAININGSIZE    = SIZE
     TESTSIZE        = SIZE/10
-
+    NUMBEROFLABELS  = len(labels)
 
     INPUTPATH = os.getcwd() + "/CIFAR-10/"
 
@@ -51,9 +57,13 @@ for SIZE in range(5000,26000,5000):
     x_train = np.reshape(x_train,(len(x_train),3,32,32))
     x_train = np.transpose(x_train,(0,3,1,2))
     x_train = np.transpose(x_train,(0,1,3,2))
-    x_train = x_train/255.
+    if(FLAGS.CenterGrayScale):
+        print("Centering data")
+        x_train = x_train*2./255. - 1.
+    else:
+        x_train = x_train/255.
 
-    y_train = keras.utils.to_categorical(y_train, 5)
+    y_train = keras.utils.to_categorical(y_train, NUMBEROFLABELS)
 
     test = unpickle(INPUTPATH + "/test_batch")
 
@@ -76,18 +86,21 @@ for SIZE in range(5000,26000,5000):
     x_test = np.reshape(x_test,(len(x_test),3,32,32))
     x_test = np.transpose(x_test,(0,3,1,2))
     x_test = np.transpose(x_test,(0,1,3,2))
-    x_test = x_test/255.
+    if(FLAGS.CenterGrayScale):
+        x_test = x_test*2./255. - 1.
+    else:
+        x_test = x_test/255.
 
-    y_test = keras.utils.to_categorical(y_test, 5)
+    y_test = keras.utils.to_categorical(y_test, NUMBEROFLABELS)
 
 
-    _ = models.Graham(x_train, y_train, x_test, y_test)
+    _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
     # _ = models.EERACN(x_train, y_train, x_test, y_test)
     print(_)
 
     score.append(_)
 
-with open('score.dat','w') as outfile:
+with open('score_Graham_simple_centered.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n")

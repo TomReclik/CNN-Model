@@ -288,36 +288,182 @@ def Lenet(x_train, y_train, x_test, y_test):
 
     return score
 
-def Graham(x_train, y_train, x_test, y_test):
+def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
     """
     http://blog.kaggle.com/2015/01/02/cifar-10-competition-winners-interviews-with-dr-ben-graham-phil-culliton-zygmunt-zajac/
     without sparsity
+    k = 320
     """
 
     model = Sequential()
 
-    model.add(Conv2D(320, (3,3), input_shape=(32,32,3)))
+    #
+    # 1x320
+    #
+
+    model.add(Conv2D(320, (2,2), input_shape=(32,32,3)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
     model.add(Conv2D(320, (2,2)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
 
-    model.add(Dropout(0.2))
+    #
+    # 2x320
+    #
 
-    model.add(Conv2D(640, (3,3)))
+    model.add(Conv2D(640, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.1))
+
+    model.add(Conv2D(640, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.1))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    #
+    # 3x320
+    #
+
+    model.add(Conv2D(960, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D(960, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.25))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    #
+    # 6x320
+    #
+
+    model.add(Conv2D(1280, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(1280, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.5))
+
+    model.add(Flatten())
+
+    model.add(Dense(NOL, activation='softmax'))
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    model.fit(x_train, y_train, batch_size=50, epochs=60)
+    score = model.evaluate(x_test, y_test, batch_size=32)
+
+    return score
+
+
+def Graham(x_train, y_train, x_test, y_test):
+    """
+    http://blog.kaggle.com/2015/01/02/cifar-10-competition-winners-interviews-with-dr-ben-graham-phil-culliton-zygmunt-zajac/
+    with sparsity
+    k = 320
+    """
+
+    model = Sequential()
+
+    #
+    # 1x320
+    #
+
+    model.add(Conv2D(320, (2,2), input_shape=(32,32,3)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+    model.add(Conv2D(320, (2,2)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    #
+    # 2x320
+    #
+
+    model.add(Conv2D(640, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.1))
+
+    model.add(Conv2D(640, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.1))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    #
+    # 3x320
+    #
+
+    model.add(Conv2D(960, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.2))
+
+    model.add(Conv2D(960, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.2))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    #
+    # 4x320
+    #
+
+    model.add(Conv2D(1280, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.3))
 
-    model.add(Conv2D(960, (3,3)))
+    model.add(Conv2D(1280, (2,2)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
 
+    #
+    # 5x320
+    #
+
+    model.add(Conv2D(1600, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
     model.add(Dropout(0.4))
+
+    model.add(Conv2D(1600, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.4))
+
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+    #
+    # 6x320
+    #
+
+    model.add(Conv2D(1920, (2,2)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(1920, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.3))
+
+    model.add(Dropout(0.5))
 
     model.add(Flatten())
 
