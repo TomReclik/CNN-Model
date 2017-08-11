@@ -94,8 +94,8 @@ for SIZE in range(5000,26000,5000):
     y_test = keras.utils.to_categorical(y_test, NUMBEROFLABELS)
 
 
-    _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
-    # _ = models.Lenet(x_train, y_train, x_test, y_test)
+    #_ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+    _ = models.Lenet(x_train, y_train, x_test, y_test)
     # _ = models.EERACN(x_train, y_train, x_test, y_test)
     print(_)
 

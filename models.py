@@ -283,7 +283,12 @@ def Lenet(x_train, y_train, x_test, y_test):
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
-    model.fit(x_train, y_train, batch_size=50, epochs=25)
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=2, verbose=0),
+        ModelCheckpoint(kfold_weights_path, monitor='val_loss', save_best_only=True, verbose=0),
+    ]
+
+    model.fit(x_train, y_train, batch_size=50, epochs=25, callbacks=callbacks)
     score = model.evaluate(x_test, y_test, batch_size=32)
 
     return score
@@ -471,6 +476,11 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
 
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=2, verbose=0),
+        ModelCheckpoint(kfold_weights_path, monitor='val_loss', save_best_only=True, verbose=0),
+    ]
 
     model.fit(x_train, y_train, batch_size=20, epochs=60)
     score = model.evaluate(x_test, y_test, batch_size=32)
