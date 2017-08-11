@@ -26,7 +26,7 @@ labels = [0,1,2,3,4,5,6,7,8,9]
 
 score = []
 
-for SIZE in range(5000,6000,5000):
+for SIZE in range(50000,51000,5000):
     TRAININGSIZE    = SIZE
     TESTSIZE        = SIZE/10
     NUMBEROFLABELS  = len(labels)
