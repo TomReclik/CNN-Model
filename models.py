@@ -367,7 +367,7 @@ def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
     return score
 
 
-def Graham(x_train, y_train, x_test, y_test):
+def Graham(x_train, y_train, x_test, y_test, NOL):
     """
     http://blog.kaggle.com/2015/01/02/cifar-10-competition-winners-interviews-with-dr-ben-graham-phil-culliton-zygmunt-zajac/
     with sparsity
@@ -380,7 +380,7 @@ def Graham(x_train, y_train, x_test, y_test):
     # 1x320
     #
 
-    model.add(Conv2D(320, (2,2), input_shape=(32,32,3)))
+    model.add(Conv2D(320, (2,2), input_shape=(128,128,3)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
     model.add(Conv2D(320, (2,2)))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
@@ -467,7 +467,7 @@ def Graham(x_train, y_train, x_test, y_test):
 
     model.add(Flatten())
 
-    model.add(Dense(5, activation='softmax'))
+    model.add(Dense(NOL, activation='softmax'))
 
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
