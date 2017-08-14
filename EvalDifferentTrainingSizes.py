@@ -6,6 +6,7 @@ import json
 import tensorflow as tf
 
 import models
+import DifferentStructures
 
 def unpickle(file):
     with open(file, 'rb') as fo:
@@ -13,7 +14,7 @@ def unpickle(file):
     return dict
 
 flags = tf.app.flags
-flags.DEFINE_string('CenterGrayScale', '', 'Center the gray scale to the interval -1,1. Bool.')
+flags.DEFINE_string('CenterGrayScale', 'True', 'Center the gray scale to the interval -1,1. Bool.')
 
 FLAGS = flags.FLAGS
 
@@ -98,12 +99,30 @@ for SIZE in range(50000,51000,5000):
     #_ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
     # _ = models.EERACN(x_train, y_train, x_test, y_test)
-    _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+    # _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
-    print(_)
+    _1 = DifferentStructures.MaxPoolIncreasingChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+    _2 = DifferentStructures.MaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+    _3 = DifferentStructures.NoMaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
-    score.append(_)
+    print("MaxPoolIncreasingChannel" +str(_1))
+    print("MaxPoolConstantChannel" +str(_2))
+    print("NoMaxPoolConstantChannel" +str(_3))
 
-with open('score_EERACN_notcentered.dat','w') as outfile:
+    score1.append(_1)
+    score2.append(_2)
+    score3.append(_3)
+
+with open('score_MaxPoolIncreasingChannel.dat','w') as outfile:
     for i in range(len(score)):
-        outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n")
+        outfile.write(str(score1[i][0]) + "    " + str(score1[i][1]) + "\n"),
+
+
+with open('score_MaxPoolConstantChannel.dat','w') as outfile:
+    for i in range(len(score)):
+        outfile.write(str(score2[i][0]) + "    " + str(score2[i][1]) + "\n")
+
+
+with open('score_NoMaxPoolConstantChannel.dat','w') as outfile:
+    for i in range(len(score)):
+        outfile.write(str(score3[i][0]) + "    " + str(score3[i][1]) + "\n")
