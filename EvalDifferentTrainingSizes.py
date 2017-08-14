@@ -13,9 +13,10 @@ def unpickle(file):
     return dict
 
 flags = tf.app.flags
-flags.DEFINE_string('CenterGrayScale', 'True', 'Center the gray scale to the interval -1,1. Bool.')
+flags.DEFINE_string('CenterGrayScale', '', 'Center the gray scale to the interval -1,1. Bool.')
 
 FLAGS = flags.FLAGS
+
 
 """
 Get data
