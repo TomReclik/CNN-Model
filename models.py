@@ -532,7 +532,7 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='loss', patience=2, verbose=0)
+        EarlyStopping(monitor='loss', patience=4, verbose=0)
     ]
     model.fit(x_train, y_train, batch_size=50, epochs=100, callbacks = callbacks)
     score = model.evaluate(x_test, y_test, batch_size=32)
