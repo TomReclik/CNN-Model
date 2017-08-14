@@ -2,7 +2,7 @@ import keras
 from keras.models import Model
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Activation, Input, advanced_activations
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Conv2D, MaxPooling2D, AveragePooling2D
 from keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
 from keras import metrics
@@ -117,10 +117,10 @@ def TIOSM(x_train, y_train, x_test, y_test):
 
     return score
 
-def EERACN(x_train, y_train, x_test, y_test):
+def EERACN_Inception(x_train, y_train, x_test, y_test):
     """
     Convolutional Network like in Empirical Evaluation of Rectified Activations in Convolution
-Network
+    Network
     """
 
     inputs = Input(shape=(32, 32, 3))
@@ -371,7 +371,6 @@ def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
 
     return score
 
-
 def Graham(x_train, y_train, x_test, y_test, NOL):
     """
     http://blog.kaggle.com/2015/01/02/cifar-10-competition-winners-interviews-with-dr-ben-graham-phil-culliton-zygmunt-zajac/
@@ -481,7 +480,61 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
         EarlyStopping(monitor='loss', patience=2, verbose=0)
     ]
 
-    model.fit(x_train, y_train, batch_size=20, epochs=60)
+    model.fit(x_train, y_train, batch_size=20, epochs=60, callbacks = callbacks)
+    score = model.evaluate(x_test, y_test, batch_size=32)
+
+    return score
+
+def EERACN(x_train, y_train, x_test, y_test, NOL):
+    """
+    Network proposed in the paper by Bing Xu et. al.
+    https://arxiv.org/pdf/1505.00853.pdf
+    """
+
+    model = Sequential()
+
+    model.add(Conv2D(192, (5,5), input_shape=(32,32,3)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(160, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(96, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+
+    model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(192, (5,5)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(192, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(192, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+
+    model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(192, (3,3)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(192, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(10, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+
+    model.add(AveragePooling2D(pool_size=(8,8), strides=(1,1), padding='same'))
+
+    model.add(Flatten())
+
+    model.add(Dense(NOL, activation='softmax'))
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    callbacks = [
+        EarlyStopping(monitor='loss', patience=2, verbose=0)
+    ]
+    model.fit(x_train, y_train, batch_size=50, epochs=100, callbacks = callbacks)
     score = model.evaluate(x_test, y_test, batch_size=32)
 
     return score

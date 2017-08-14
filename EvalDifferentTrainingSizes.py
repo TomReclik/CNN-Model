@@ -21,11 +21,11 @@ FLAGS = flags.FLAGS
 Get data
 """
 
-labels = [0,1,2,3,4]
+labels = [0,1,2,3,4,5,6,7,8,9]
 
 score = []
 
-for SIZE in range(5000,26000,5000):
+for SIZE in range(50000,51000,5000):
     TRAININGSIZE    = SIZE
     TESTSIZE        = SIZE/10
     NUMBEROFLABELS  = len(labels)
@@ -95,8 +95,10 @@ for SIZE in range(5000,26000,5000):
 
 
     #_ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
-    _ = models.Lenet(x_train, y_train, x_test, y_test)
+    # _ = models.Lenet(x_train, y_train, x_test, y_test)
     # _ = models.EERACN(x_train, y_train, x_test, y_test)
+    _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+
     print(_)
 
     score.append(_)
