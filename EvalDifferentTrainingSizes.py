@@ -104,6 +104,6 @@ for SIZE in range(50000,51000,5000):
 
     score.append(_)
 
-with open('score_Graham_simple_centered.dat','w') as outfile:
+with open('score_EERACN_notcentered.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n")
