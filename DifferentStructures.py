@@ -250,11 +250,11 @@ def NoMaxPoolConstantChannel(x_train, y_train, x_test, y_test, NOL, k):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='val_loss', patience=4, verbose=2),
-        keras.callbacks.TensorBoard(log_dir='logs/NMPCC',
-                 histogram_freq=1,
-                 write_graph=True,
-                 write_images=False)
+        EarlyStopping(monitor='val_loss', patience=4, verbose=2)
+        # keras.callbacks.TensorBoard(log_dir='logs/NMPCC',
+        #          histogram_freq=1,
+        #          write_graph=True,
+        #          write_images=False)
     ]
 
     model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks=callbacks, verbose=1, validation_split=0.2)

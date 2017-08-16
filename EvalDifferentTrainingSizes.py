@@ -23,11 +23,14 @@ FLAGS = flags.FLAGS
 Get data
 """
 
-labels = [0,1,2,3,4,5,6,7,8,9]
+labels = [0,1,2,3,4]
 
 score = []
 
-for SIZE in range(25000,26000,5000):
+for SIZE in range(100,1000,100):
+    #
+    # Number of elements per class
+    #
     TRAININGSIZE    = SIZE
     TESTSIZE        = SIZE/10
     NUMBEROFLABELS  = len(labels)
@@ -44,13 +47,14 @@ for SIZE in range(25000,26000,5000):
         y = train["labels"]
 
         for i in range(len(y)):
-            if(len(y_train)==TRAININGSIZE):
+            if(len(y_train)==TRAININGSIZE*NUMBEROFLABELS):
                 break
             if(y[i] in labels):
-                x_train.append(x[i])
-                y_train.append(y[i])
+                if(y_train.count(y[i])<=TRAININGSIZE):
+                    x_train.append(x[i])
+                    y_train.append(y[i])
 
-        if(len(y_train)==TRAININGSIZE):
+        if(len(y_train)==TRAININGSIZE*NUMBEROFLABELS):
             break
 
     x_train = np.array(x_train, float)
@@ -76,11 +80,12 @@ for SIZE in range(25000,26000,5000):
     y_test = []
 
     for i in range(len(y)):
-        if(len(y_test) == TESTSIZE):
+        if(len(y_test) == TESTSIZE*NUMBEROFLABELS):
             break
         if(y[i] in labels):
-            x_test.append(x[i])
-            y_test.append(y[i])
+            if(y_test.count(y[i])<=TESTSIZE):
+                x_test.append(x[i])
+                y_test.append(y[i])
 
     x_test = np.array(x_test, float)
     y_test = np.array(y_test, int)
@@ -95,13 +100,12 @@ for SIZE in range(25000,26000,5000):
 
     y_test = keras.utils.to_categorical(y_test, NUMBEROFLABELS)
 
-
     # _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
     _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
     score.append(_)
 
-with open('score_test.dat','w') as outfile:
+with open('score_EERACN_below5000.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n"),

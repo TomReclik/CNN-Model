@@ -23,9 +23,9 @@ FLAGS = flags.FLAGS
 Get data
 """
 
-labels = [0,1,2,3,4,5,6,7,8,9]
+labels = [0,1,2,3,4]
 
-SIZE = 25000
+SIZE = 1000
 
 TRAININGSIZE    = SIZE
 TESTSIZE        = SIZE/10
@@ -110,10 +110,13 @@ y_test = keras.utils.to_categorical(y_test, NUMBEROFLABELS)
 # with open('score_MaxPoolConstantChannel.dat','w') as outfile:
     # outfile.write(str(scoreMPCC[0]) + "    " + str(scoreMPCC[1]) + "\n")
 
-scoreNMPCC = DifferentStructures.NoMaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
+_ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+print(_)
 
-print("NoMaxPoolConstantChannel")
-print(scoreMPCC)
-
-with open('score_NoMaxPoolConstantChannel.dat','w') as outfile:
-    outfile.write(str(scoreNMPCC[0]) + "    " + str(scoreNMPCC[1]) + "\n")
+# scoreNMPCC = DifferentStructures.NoMaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
+#
+# print("NoMaxPoolConstantChannel")
+# print(scoreNMPCC)
+#
+# with open('score_NoMaxPoolConstantChannel.dat','w') as outfile:
+#     outfile.write(str(scoreNMPCC[0]) + "    " + str(scoreNMPCC[1]) + "\n")
