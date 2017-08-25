@@ -106,6 +106,6 @@ for SIZE in range(100,1000,100):
 
     score.append(_)
 
-with open('score_EERACN_below5000.dat','w') as outfile:
+with open('score_EERACN_below5000_2.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n"),
