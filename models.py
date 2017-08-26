@@ -546,3 +546,66 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
     score = model.evaluate(x_test, y_test, batch_size=20)
 
     return score
+
+def EERACN_l2(x_train, y_train, x_test, y_test, NOL):
+    """
+    Network proposed in the paper by Bing Xu et. al.
+    https://arxiv.org/pdf/1505.00853.pdf
+    Instead of dropout this utilizes the l2 norm regularizer
+    """
+
+    model = Sequential()
+
+    model.add(Conv2D(192, (5,5), input_shape=(32,32,3),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(160, (1,1),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(96, (1,1),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+
+    model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+
+    model.add(Conv2D(192, (5,5),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(192, (1,1),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(192, (1,1),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+
+    model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+
+    model.add(Conv2D(192, (3,3),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(192, (1,1),
+                kernel_regularizer=regularizers.l2(0.01)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(10, (1,1)))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+
+    model.add(AveragePooling2D(pool_size=(8,8), strides=(1,1), padding='same'))
+
+    model.add(Flatten())
+
+    model.add(Dense(NOL, activation='softmax'))
+
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=4, verbose=0),
+        keras.callbacks.TensorBoard(log_dir='logs/EERACN_l2',
+                 histogram_freq=1,
+                 write_graph=True,
+                 write_images=False)
+    ]
+    model.fit(x_train, y_train, batch_size=50, epochs=100, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=32)
+
+    return score
