@@ -102,10 +102,10 @@ for SIZE in range(20000,21000,5000):
 
     # _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
-    _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+    _ = models.EERACN_l2_inc(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
     score.append(_)
 
-with open('score_EERACN_DROPOUT.dat','w') as outfile:
+with open('score_EERACN_inc.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n"),
