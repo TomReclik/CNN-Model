@@ -7,6 +7,7 @@ from keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
 from keras import metrics
 from keras.callbacks import EarlyStopping
+from keras import regularizers
 
 def CCIFC(x_train, y_train, x_test, y_test):
     """
@@ -536,11 +537,11 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='val_loss', patience=4, verbose=0)
-        # keras.callbacks.TensorBoard(log_dir='logs/EERACN',
-        #          histogram_freq=1,
-        #          write_graph=True,
-        #          write_images=False)
+        EarlyStopping(monitor='val_loss', patience=4, verbose=0),
+        keras.callbacks.TensorBoard(log_dir='logs/EERACN_DROPOUT',
+                 histogram_freq=1,
+                 write_graph=False,
+                 write_images=False)
     ]
     model.fit(x_train, y_train, batch_size=20, epochs=150, callbacks = callbacks, validation_split=0.2)
     score = model.evaluate(x_test, y_test, batch_size=20)
@@ -554,37 +555,39 @@ def EERACN_l2(x_train, y_train, x_test, y_test, NOL):
     Instead of dropout this utilizes the l2 norm regularizer
     """
 
+    LAMBDA=0.0001
+
     model = Sequential()
 
     model.add(Conv2D(192, (5,5), input_shape=(32,32,3),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(160, (1,1),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(96, (1,1),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
     model.add(Conv2D(192, (5,5),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(192, (1,1),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(192, (1,1),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
     model.add(Conv2D(192, (3,3),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(192, (1,1),
-                kernel_regularizer=regularizers.l2(0.01)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(10, (1,1)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
@@ -600,9 +603,9 @@ def EERACN_l2(x_train, y_train, x_test, y_test, NOL):
 
     callbacks = [
         EarlyStopping(monitor='val_loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir='logs/EERACN_l2',
+        keras.callbacks.TensorBoard(log_dir='logs/EERACN_l2_00001',
                  histogram_freq=1,
-                 write_graph=True,
+                 write_graph=False,
                  write_images=False)
     ]
     model.fit(x_train, y_train, batch_size=50, epochs=100, callbacks = callbacks, validation_split=0.2)

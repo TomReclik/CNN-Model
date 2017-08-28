@@ -27,7 +27,7 @@ labels = [0,1,2,3,4]
 
 score = []
 
-for SIZE in range(100,1000,100):
+for SIZE in range(20000,21000,5000):
     #
     # Number of elements per class
     #
@@ -102,14 +102,10 @@ for SIZE in range(100,1000,100):
 
     # _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
-    _ = models.EERACN_l2(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+    _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
     score.append(_)
 
-<<<<<<< HEAD
-with open('score_EERACN_below5000_2.dat','w') as outfile:
-=======
-with open('score_EERACN_l2.dat','w') as outfile:
->>>>>>> 0b1f101a2ef7072bf62533d03fe2a8d88ec5de74
+with open('score_EERACN_DROPOUT.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n"),
