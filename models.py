@@ -613,7 +613,7 @@ def EERACN_l2_simple(x_train, y_train, x_test, y_test, NOL):
 
     return score
 
-def EERACN_l2_inc(x_train, y_train, x_test, y_test, NOL):
+def EERACN_l2_dec(x_train, y_train, x_test, y_test, NOL):
     """
     Network proposed in the paper by Bing Xu et. al.
     https://arxiv.org/pdf/1505.00853.pdf
@@ -626,13 +626,13 @@ def EERACN_l2_inc(x_train, y_train, x_test, y_test, NOL):
     model = Sequential()
 
     model.add(Conv2D(192, (5,5), input_shape=(32,32,3),
-                kernel_regularizer=regularizers.l2(LAMBDA)))
+                kernel_regularizer=regularizers.l2(10*LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(160, (1,1),
-                kernel_regularizer=regularizers.l2(LAMBDA)))
+                kernel_regularizer=regularizers.l2(10*LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(96, (1,1),
-                kernel_regularizer=regularizers.l2(LAMBDA)))
+                kernel_regularizer=regularizers.l2(10*LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
@@ -650,10 +650,10 @@ def EERACN_l2_inc(x_train, y_train, x_test, y_test, NOL):
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
     model.add(Conv2D(192, (3,3),
-                kernel_regularizer=regularizers.l2(10*LAMBDA)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(192, (1,1),
-                kernel_regularizer=regularizers.l2(10*LAMBDA)))
+                kernel_regularizer=regularizers.l2(LAMBDA)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
     model.add(Conv2D(10, (1,1)))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
@@ -669,7 +669,7 @@ def EERACN_l2_inc(x_train, y_train, x_test, y_test, NOL):
 
     callbacks = [
         EarlyStopping(monitor='val_loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir='logs/EERACN_l2_00001',
+        keras.callbacks.TensorBoard(log_dir='logs/EERACN_l2_dec',
                  histogram_freq=1,
                  write_graph=False,
                  write_images=False)
