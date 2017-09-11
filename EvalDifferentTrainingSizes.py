@@ -23,11 +23,11 @@ FLAGS = flags.FLAGS
 Get data
 """
 
-labels = [0,1,2,3,4]
+labels = [0,1,2,3,4,5,6,7,8,9]
 
 score = []
 
-for SIZE in range(20000,21000,5000):
+for SIZE in range(1000,1100,1000):
     #
     # Number of elements per class
     #
@@ -102,10 +102,10 @@ for SIZE in range(20000,21000,5000):
 
     # _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
-    _ = models.EERACN_l2_dec(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+    _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
     score.append(_)
 
-with open('score_EERACN_dec.dat','w') as outfile:
+with open('score_EERACN_LBFGS.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n"),

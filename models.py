@@ -3,11 +3,13 @@ from keras.models import Model
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Activation, Input, advanced_activations
 from keras.layers import Conv2D, MaxPooling2D, AveragePooling2D
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras import metrics
 from keras.callbacks import EarlyStopping
 from keras import regularizers
+from keras.initializers import glorot_uniform, Zeros, he_normal
+import tensorflow as tf
 
 def CCIFC(x_train, y_train, x_test, y_test):
     """
@@ -498,33 +500,42 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model = Sequential()
 
-    model.add(Conv2D(192, (5,5), input_shape=(32,32,3)))
+    model.add(Conv2D(192, (5,5), input_shape=(32,32,3), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
-    model.add(Conv2D(160, (1,1)))
+    model.add(Conv2D(160, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
-    model.add(Conv2D(96, (1,1)))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
-
-    model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
-
-    model.add(Dropout(0.5))
-
-    model.add(Conv2D(192, (5,5)))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
-    model.add(Conv2D(192, (1,1)))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
-    model.add(Conv2D(192, (1,1)))
+    model.add(Conv2D(96, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
     model.add(Dropout(0.5))
 
-    model.add(Conv2D(192, (3,3)))
+    model.add(Conv2D(192, (5,5), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
-    model.add(Conv2D(192, (1,1)))
+    model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
-    model.add(Conv2D(10, (1,1)))
+    model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+
+    model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(192, (3,3), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
+    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(Conv2D(10, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.18))
 
     model.add(AveragePooling2D(pool_size=(8,8), strides=(1,1), padding='same'))
@@ -533,12 +544,26 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Dense(NOL, activation='softmax'))
 
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    #
+    # Adding L-BFGS
+    #
+
+    loss = keras.losses.categorical_crossentropy()
+
+    tfoptimizer = tf.contrib.opt.ScipyOptimizerInterface(
+                loss,
+                method='L-BFGS-B',
+                options={'maxiter': iterations})
+
+    optimizer = keras.optimizers.TFOptimizer(tfoptimizer)
+
+    # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     callbacks = [
         EarlyStopping(monitor='val_loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir='logs/EERACN_DROPOUT',
+        keras.callbacks.TensorBoard(log_dir=('logs/EERACN_LBFGS_'+str(len(x_train))),
                  histogram_freq=1,
                  write_graph=False,
                  write_images=False)
