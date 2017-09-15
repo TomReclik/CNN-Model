@@ -25,8 +25,17 @@ Get data
 
 labels = [0,1,2,3,4]
 
-SIZE = 1000
+SIZE = 5000
 
+TRAININGSIZE    = SIZE
+TESTSIZE        = SIZE/10
+NUMBEROFLABELS  = len(labels)
+
+INPUTPATH = os.getcwd() + "/CIFAR-10/"
+
+#
+# Number of elements per class
+#
 TRAININGSIZE    = SIZE
 TESTSIZE        = SIZE/10
 NUMBEROFLABELS  = len(labels)
@@ -43,13 +52,14 @@ for f in range(1,6):
     y = train["labels"]
 
     for i in range(len(y)):
-        if(len(y_train)==TRAININGSIZE):
+        if(len(y_train)==TRAININGSIZE*NUMBEROFLABELS):
             break
         if(y[i] in labels):
-            x_train.append(x[i])
-            y_train.append(y[i])
+            if(y_train.count(y[i])<=TRAININGSIZE):
+                x_train.append(x[i])
+                y_train.append(y[i])
 
-    if(len(y_train)==TRAININGSIZE):
+    if(len(y_train)==TRAININGSIZE*NUMBEROFLABELS):
         break
 
 x_train = np.array(x_train, float)
@@ -59,7 +69,6 @@ x_train = np.reshape(x_train,(len(x_train),3,32,32))
 x_train = np.transpose(x_train,(0,3,1,2))
 x_train = np.transpose(x_train,(0,1,3,2))
 if(FLAGS.CenterGrayScale):
-    print("Centering data")
     x_train = x_train*2./255. - 1.
 else:
     x_train = x_train/255.
@@ -75,11 +84,12 @@ x_test = []
 y_test = []
 
 for i in range(len(y)):
-    if(len(y_test) == TESTSIZE):
+    if(len(y_test) == TESTSIZE*NUMBEROFLABELS):
         break
     if(y[i] in labels):
-        x_test.append(x[i])
-        y_test.append(y[i])
+        if(y_test.count(y[i])<=TESTSIZE):
+            x_test.append(x[i])
+            y_test.append(y[i])
 
 x_test = np.array(x_test, float)
 y_test = np.array(y_test, int)
@@ -94,29 +104,23 @@ else:
 
 y_test = keras.utils.to_categorical(y_test, NUMBEROFLABELS)
 
-# scoreMPIC = DifferentStructures.MaxPoolIncreasingChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
-#
-# print("MaxPoolIncreasingChannel")
-# print(scoreMPIC)
-#
-# with open('score_MaxPoolIncreasingChannel.dat','w') as outfile:
-#     outfile.write(str(scoreMPIC[0]) + "    " + str(scoreMPIC[1]) + "\n")
+scores = []
 
-# scoreMPCC = DifferentStructures.MaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
-#
-# print("MaxPoolConstantChannel")
-# print(scoreMPCC)
-#
-# with open('score_MaxPoolConstantChannel.dat','w') as outfile:
-    # outfile.write(str(scoreMPCC[0]) + "    " + str(scoreMPCC[1]) + "\n")
+# _ = DifferentStructures.MaxPoolIncreasingChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
 
-_ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
+_ = DifferentStructures.MaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
+#
+# scores.append(_)
+#
+# _ = DifferentStructures.NoMaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
+#
+# scores.append(_)
+
+# print("NoMaxPoolConstantChannel")
+# print(_)
+
+print("MaxPoolConstantChannel")
 print(_)
-
-# scoreNMPCC = DifferentStructures.NoMaxPoolConstantChannel(x_train, y_train, x_test, y_test, NUMBEROFLABELS, 180)
 #
 # print("NoMaxPoolConstantChannel")
-# print(scoreNMPCC)
-#
-# with open('score_NoMaxPoolConstantChannel.dat','w') as outfile:
-#     outfile.write(str(scoreNMPCC[0]) + "    " + str(scoreNMPCC[1]) + "\n")
+# print(scores[2])

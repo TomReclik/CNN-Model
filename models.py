@@ -11,56 +11,164 @@ from keras import regularizers
 from keras.initializers import glorot_uniform, Zeros, he_normal
 import tensorflow as tf
 
-def CCIFC(x_train, y_train, x_test, y_test):
+def ClassicalCNN(x_train, y_train, x_test, y_test, NOL):
+    model = Sequential()
+
+    model.add(Conv2D(64, (3,3), input_shape=(32,32,3),
+                activation=advanced_activations.LeakyReLU(alpha=0.18),
+                kernel_initializer='he_normal', bias_initializer='zeros'))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Conv2D(128, (3,3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                kernel_initializer='he_normal', bias_initializer='zeros'))
+    model.add(Conv2D(128, (3,3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                kernel_initializer='he_normal', bias_initializer='zeros'))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+
+    model.add(Flatten())
+
+    model.add(Dense(512, activation=advanced_activations.LeakyReLU(alpha=0.18),
+                kernel_initializer='he_normal', bias_initializer='zeros'))
+
+    model.add(Dropout(0.5))
+
+    model.add(Dense(NOL, kernel_initializer='he_normal', bias_initializer='zeros',
+                activation='softmax'))
+
+    optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=4, verbose=0),
+        # keras.callbacks.TensorBoard(log_dir=('logs/EERACN_LBFGS_'+str(len(x_train))),
+        #          histogram_freq=1,
+        #          write_graph=False,
+        #          write_images=False)
+    ]
+    model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
+
+    return score
+
+def CCIFC(x_train, y_train, x_test, y_test, NOL):
     """
     Convolutional Network with:
-        - 2 Convolutional layers
+        - 1 Convolutional layers
         - 1 Inception layer
         - 1 Fully connected output layer
     """
 
     inputs = Input(shape=(32, 32, 3))
 
-    x = Conv2D(16, (3, 3), activation='relu')(inputs)
-    x = Conv2D(16, (3, 3), activation='relu')(x)
-    x = MaxPooling2D(pool_size=(2, 2))(x)
-    x = Dropout(0.25)(x)
+    x = Conv2D(192, (5, 5), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                kernel_initializer='he_normal', bias_initializer='zeros')(inputs)
 
-    x = Conv2D(32, (3, 3), activation='relu')(inputs)
-    x = Conv2D(32, (3, 3), activation='relu')(x)
-    x = MaxPooling2D(pool_size=(2, 2))(x)
-    x = Dropout(0.25)(x)
+    tower_1 = Conv2D(160, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(x)
+    tower_1 = Conv2D(96, (3, 3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_1)
 
-    tower_1 = Conv2D(16, (1, 1), padding='same', activation='relu')(x)
-    tower_1 = Conv2D(16, (3, 3), padding='same', activation='relu')(tower_1)
-
-    tower_2 = Conv2D(16, (1, 1), padding='same', activation='relu')(x)
-    tower_2 = Conv2D(16, (4, 4), padding='same', activation='relu')(tower_2)
+    tower_2 = Conv2D(160, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(x)
+    tower_2 = Conv2D(96, (4, 4), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_2)
 
     tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(x)
-    tower_3 = Conv2D(16, (1, 1), padding='same', activation='relu')(tower_3)
+    tower_3 = Conv2D(96, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_3)
 
     inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
 
-    x = Dropout(0.35)(inception)
+    maxpool = MaxPooling2D(pool_size=(3,3), strides=(2,2))(inception)
 
-    x = Flatten()(x)
-    x = Dense(256, activation='relu')(x)
-    x = Dropout(0.5)(x)
-    outputs= Dense(5, activation='softmax')(x)
+    x = Dropout(0.3)(maxpool)
+
+    x = Conv2D(192, (5, 5), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                kernel_initializer='he_normal', bias_initializer='zeros')(x)
+
+    tower_1 = Conv2D(160, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(x)
+    tower_1 = Conv2D(96, (3, 3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_1)
+
+    tower_2 = Conv2D(160, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(x)
+    tower_2 = Conv2D(96, (4, 4), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_2)
+
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(x)
+    tower_3 = Conv2D(96, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_3)
+
+    inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
+
+    maxpool = MaxPooling2D(pool_size=(3,3), strides=(2,2))(inception)
+
+    x = Dropout(0.4)(maxpool)
+
+    x = Conv2D(192, (3, 3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                kernel_initializer='he_normal', bias_initializer='zeros')(x)
+
+    tower_1 = Conv2D(100, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(x)
+    tower_1 = Conv2D(64, (3, 3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_1)
+
+    tower_2 = Conv2D(100, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(x)
+    tower_2 = Conv2D(64, (4, 4), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_2)
+
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(x)
+    tower_3 = Conv2D(64, (1, 1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_3)
+
+    inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
+
+    x = Dropout(0.5)(inception)
+
+    conv = Conv2D(NOL, (1,1), activation=advanced_activations.LeakyReLU(alpha=0.18),
+                padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(x)
+
+    x2 = Flatten()(conv)
+
+    outputs = Dense(NOL, activation='softmax')(x2)
 
     model = Model(inputs=inputs, outputs=outputs)
 
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-    model.fit(x_train, y_train, batch_size=40, epochs=100)
-
-    score = model.evaluate(x_test, y_test, batch_size=500)
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=4, verbose=0),
+        # keras.callbacks.TensorBoard(log_dir=('logs/EERACN_LBFGS_'+str(len(x_train))),
+        #          histogram_freq=1,
+        #          write_graph=False,
+        #          write_images=False)
+    ]
+    model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score
 
-def TIOSM(x_train, y_train, x_test, y_test):
+def TIOSM(x_train, y_train, x_test, y_test, NOL):
     """
     Convolutional Network with:
         - 3 Inception layer
@@ -114,9 +222,15 @@ def TIOSM(x_train, y_train, x_test, y_test):
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
-    model.fit(x_train, y_train, batch_size=40, epochs=20)
-
-    score = model.evaluate(x_test, y_test, batch_size=40)
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=4, verbose=0),
+        # keras.callbacks.TensorBoard(log_dir=('logs/EERACN_LBFGS_'+str(len(x_train))),
+        #          histogram_freq=1,
+        #          write_graph=False,
+        #          write_images=False)
+    ]
+    model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score
 
@@ -128,9 +242,26 @@ def EERACN_Inception(x_train, y_train, x_test, y_test):
 
     inputs = Input(shape=(32, 32, 3))
 
-    tower_1 = Conv2D(100, (1, 1), padding='same', activation='relu')(inputs)
-    tower_2 = Conv2D(100, (3, 3), padding='same', activation='relu')(inputs)
-    tower_3 = Conv2D(100, (5, 5), padding='same', activation='relu')(inputs)
+    tower_1 = Conv2D(16, (1, 1), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(inputs)
+    tower_1 = Conv2D(16, (3, 3), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_1)
+
+    tower_2 = Conv2D(16, (1, 1), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(inputs)
+    tower_2 = Conv2D(16, (4, 4), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_2)
+
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), kernel_initializer='he_normal',
+                bias_initializer='zeros')(inputs)
+    tower_3 = Conv2D(16, (1, 1), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_3)
+
+    inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
+
+    tower_1 = Conv2D(100, (1, 1), padding='valid', activation='relu')(inputs)
+    tower_2 = Conv2D(100, (3, 3), padding='valid', activation='relu')(inputs)
+    tower_3 = Conv2D(100, (5, 5), padding='valid', activation='relu')(inputs)
 
     inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)
 
@@ -273,7 +404,7 @@ def Lenet(x_train, y_train, x_test, y_test):
 
     model = Sequential()
 
-    model.add(Conv2D(20, (5,5), activation='relu', input_shape=(32,32,3)))
+    model.add(Conv2D(6, (5,5), activation='relu', input_shape=(32,32,3)))
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
 
     model.add(Conv2D(50, (5,5), activation='relu'))
@@ -313,9 +444,11 @@ def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
     # 1x320
     #
 
-    model.add(Conv2D(320, (2,2), input_shape=(32,32,3)))
+    model.add(Conv2D(320, (2,2), input_shape=(32,32,3), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
-    model.add(Conv2D(320, (2,2)))
+    model.add(Conv2D(320, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
@@ -324,12 +457,14 @@ def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
     # 2x320
     #
 
-    model.add(Conv2D(640, (2,2)))
+    model.add(Conv2D(640, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.1))
 
-    model.add(Conv2D(640, (2,2)))
+    model.add(Conv2D(640, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.1))
@@ -340,12 +475,14 @@ def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
     # 3x320
     #
 
-    model.add(Conv2D(960, (2,2)))
+    model.add(Conv2D(960, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.25))
 
-    model.add(Conv2D(960, (2,2)))
+    model.add(Conv2D(960, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.25))
@@ -356,12 +493,14 @@ def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
     # 6x320
     #
 
-    model.add(Conv2D(1280, (2,2)))
+    model.add(Conv2D(1280, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.5))
 
-    model.add(Conv2D(1280, (1,1)))
+    model.add(Conv2D(1280, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.5))
@@ -370,11 +509,16 @@ def Graham_Simple(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Dense(NOL, activation='softmax'))
 
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    optimizer = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    # optimizer = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-    model.fit(x_train, y_train, batch_size=50, epochs=30)
-    score = model.evaluate(x_test, y_test, batch_size=32)
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=3, verbose=0)
+    ]
+
+    model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score
 
@@ -391,9 +535,11 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
     # 1x320
     #
 
-    model.add(Conv2D(320, (2,2), input_shape=(128,128,3)))
+    model.add(Conv2D(320, (2,2), input_shape=(128,128,3), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
-    model.add(Conv2D(320, (2,2)))
+    model.add(Conv2D(320, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
@@ -402,12 +548,14 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
     # 2x320
     #
 
-    model.add(Conv2D(640, (2,2)))
+    model.add(Conv2D(640, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.1))
 
-    model.add(Conv2D(640, (2,2)))
+    model.add(Conv2D(640, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.1))
@@ -418,12 +566,14 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
     # 3x320
     #
 
-    model.add(Conv2D(960, (2,2)))
+    model.add(Conv2D(960, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.2))
 
-    model.add(Conv2D(960, (2,2)))
+    model.add(Conv2D(960, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.2))
@@ -434,12 +584,14 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
     # 4x320
     #
 
-    model.add(Conv2D(1280, (2,2)))
+    model.add(Conv2D(1280, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.3))
 
-    model.add(Conv2D(1280, (2,2)))
+    model.add(Conv2D(1280, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.3))
@@ -450,12 +602,14 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
     # 5x320
     #
 
-    model.add(Conv2D(1600, (2,2)))
+    model.add(Conv2D(1600, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.4))
 
-    model.add(Conv2D(1600, (2,2)))
+    model.add(Conv2D(1600, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.4))
@@ -466,12 +620,14 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
     # 6x320
     #
 
-    model.add(Conv2D(1920, (2,2)))
+    model.add(Conv2D(1920, (2,2), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.5))
 
-    model.add(Conv2D(1920, (1,1)))
+    model.add(Conv2D(1920, (1,1), kernel_initializer='he_normal',
+                bias_initializer='zeros'))
     model.add(advanced_activations.LeakyReLU(alpha=0.3))
 
     model.add(Dropout(0.5))
@@ -480,15 +636,15 @@ def Graham(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Dense(NOL, activation='softmax'))
 
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    optimizer = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='loss', patience=2, verbose=0)
+        EarlyStopping(monitor='val_loss', patience=3, verbose=0)
     ]
 
-    model.fit(x_train, y_train, batch_size=20, epochs=60, callbacks = callbacks)
-    score = model.evaluate(x_test, y_test, batch_size=32)
+    model.fit(x_train, y_train, batch_size=20, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=20)
 
     return score
 
@@ -502,13 +658,13 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Conv2D(192, (5,5), input_shape=(32,32,3), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
     model.add(Conv2D(160, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
     model.add(Conv2D(96, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
@@ -516,13 +672,13 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Conv2D(192, (5,5), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
     model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
     model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
@@ -530,13 +686,13 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Conv2D(192, (3,3), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
     model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
     model.add(Conv2D(10, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.18))
+    model.add(advanced_activations.LeakyReLU(alpha=0.31))
 
     model.add(AveragePooling2D(pool_size=(8,8), strides=(1,1), padding='same'))
 
@@ -544,32 +700,19 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Dense(NOL, activation='softmax'))
 
-    #
-    # Adding L-BFGS
-    #
-
-    loss = keras.losses.categorical_crossentropy()
-
-    tfoptimizer = tf.contrib.opt.ScipyOptimizerInterface(
-                loss,
-                method='L-BFGS-B',
-                options={'maxiter': iterations})
-
-    optimizer = keras.optimizers.TFOptimizer(tfoptimizer)
-
-    # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     callbacks = [
         EarlyStopping(monitor='val_loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir=('logs/EERACN_LBFGS_'+str(len(x_train))),
+        keras.callbacks.TensorBoard(log_dir=('logs/EERACN_VeryLeakyReLu),
                  histogram_freq=1,
                  write_graph=False,
                  write_images=False)
     ]
-    model.fit(x_train, y_train, batch_size=20, epochs=150, callbacks = callbacks, validation_split=0.2)
-    score = model.evaluate(x_test, y_test, batch_size=20)
+    model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score
 
@@ -703,3 +846,24 @@ def EERACN_l2_dec(x_train, y_train, x_test, y_test, NOL):
     score = model.evaluate(x_test, y_test, batch_size=32)
 
     return score
+
+def InceptionV3(x_train, y_train, x_test, y_test, NOL):
+
+    inputs = Input(shape=(32, 32, 3))
+
+    tower_1 = Conv2D(16, (1, 1), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(inputs)
+    tower_1 = Conv2D(16, (3, 3), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_1)
+
+    tower_2 = Conv2D(16, (1, 1), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(inputs)
+    tower_2 = Conv2D(16, (4, 4), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_2)
+
+    tower_3 = MaxPooling2D((3, 3), strides=(1, 1), kernel_initializer='he_normal',
+                bias_initializer='zeros')(inputs)
+    tower_3 = Conv2D(16, (1, 1), padding='same', kernel_initializer='he_normal',
+                bias_initializer='zeros')(tower_3)
+
+    inception = keras.layers.concatenate([tower_1, tower_2, tower_3], axis=1)

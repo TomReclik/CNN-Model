@@ -82,16 +82,14 @@ def MaxPoolIncreasingChannel(x_train, y_train, x_test, y_test, NOL):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir='MPIC.log',
+        EarlyStopping(monitor='val_acc', patience=4, verbose=0),
+        keras.callbacks.TensorBoard(log_dir='logs/MPIC'),
                  histogram_freq=1,
                  write_graph=True,
-                 write_images=False)
-
+                 write_images=True)
     ]
-
-    model.fit(x_train, y_train, batch_size=50, epochs=30, callbacks=callbacks)
-    score = model.evaluate(x_test, y_test, batch_size=32)
+    model.fit(x_train, y_train, batch_size=200, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score
 
@@ -169,16 +167,14 @@ def MaxPoolConstantChannel(x_train, y_train, x_test, y_test, NOL):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir='MPCC.log',
+        EarlyStopping(monitor='val_acc', patience=1, verbose=0),
+        keras.callbacks.TensorBoard(log_dir='logs/MPCC'),
                  histogram_freq=1,
                  write_graph=True,
-                 write_images=False)
-
+                 write_images=True)
     ]
-
-    model.fit(x_train, y_train, batch_size=50, epochs=30,, callbacks=callbacks)
-    score = model.evaluate(x_test, y_test, batch_size=32)
+    model.fit(x_train, y_train, batch_size=200, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score
 
@@ -250,15 +246,13 @@ def NoMaxPoolConstantChannel(x_train, y_train, x_test, y_test, NOL):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir='NMPCC.log',
+        EarlyStopping(monitor='val_acc', patience=1, verbose=0),
+        keras.callbacks.TensorBoard(log_dir='logs/NMPCC'),
                  histogram_freq=1,
                  write_graph=True,
-                 write_images=False)
-
+                 write_images=True)
     ]
-
-    model.fit(x_train, y_train, batch_size=50, epochs=30, callbacks=callbacks)
-    score = model.evaluate(x_test, y_test, batch_size=32)
+    model.fit(x_train, y_train, batch_size=200, epochs=150, callbacks = callbacks, validation_split=0.2)
+    score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score

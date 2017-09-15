@@ -23,11 +23,27 @@ FLAGS = flags.FLAGS
 Get data
 """
 
-labels = [0,1,2,3,4,5,6,7,8,9]
+labels = [0,1,2,3,4]
 
 score = []
 
-for SIZE in range(1000,1100,1000):
+#
+# Low number of examples range
+#
+
+low = range(100,1000,100)
+
+#
+# High number of examples range
+#
+
+high = range(1000,6000,1000)
+
+RANGE = low+high
+
+RANGE = [1000]
+
+for SIZE in RANGE:
     #
     # Number of elements per class
     #
@@ -64,7 +80,6 @@ for SIZE in range(1000,1100,1000):
     x_train = np.transpose(x_train,(0,3,1,2))
     x_train = np.transpose(x_train,(0,1,3,2))
     if(FLAGS.CenterGrayScale):
-        print("Centering data")
         x_train = x_train*2./255. - 1.
     else:
         x_train = x_train/255.
@@ -102,10 +117,11 @@ for SIZE in range(1000,1100,1000):
 
     # _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
+    # _ = models.CCIFC(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
     score.append(_)
 
-with open('score_EERACN_LBFGS.dat','w') as outfile:
+with open('score_CCIFC.dat','w') as outfile:
     for i in range(len(score)):
-        outfile.write(str(score[i][0]) + "    " + str(score[i][1]) + "\n"),
+        outfile.write(str(RANGE[i]) + "\t" + str(score[i][0]) + "\t" + str(score[i][1]) + "\n"),
