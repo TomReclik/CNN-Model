@@ -705,11 +705,11 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='val_loss', patience=4, verbose=0),
-        keras.callbacks.TensorBoard(log_dir=('logs/EERACN_VeryLeakyReLu),
-                 histogram_freq=1,
-                 write_graph=False,
-                 write_images=False)
+        EarlyStopping(monitor='val_loss', patience=4, verbose=0)
+        # , keras.callbacks.TensorBoard(log_dir=('logs/EERACN_VeryLeakyReLu),
+        #          histogram_freq=1,
+        #          write_graph=False,
+        #          write_images=False)
     ]
     model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2)
     score = model.evaluate(x_test, y_test, batch_size=50)

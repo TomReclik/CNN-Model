@@ -23,7 +23,16 @@ FLAGS = flags.FLAGS
 Get data
 """
 
-labels = [0,1,2,3,4]
+labels = [0,1,2,3,4,5]
+
+dist = [0.0799,0.1076,0.4132,0.0035,0.3229,0.0729]
+
+#
+# All categarozies equally often
+#
+# dist = [1./len(labels)] * len(labels)
+
+DSUM = sum(dist)
 
 score = []
 
@@ -31,17 +40,15 @@ score = []
 # Low number of examples range
 #
 
-low = range(100,1000,100)
+low = range(500,5000,500)
 
 #
 # High number of examples range
 #
 
-high = range(1000,6000,1000)
+high = range(5000,26000,5000)
 
 RANGE = low+high
-
-RANGE = [1000]
 
 for SIZE in RANGE:
     #
@@ -63,14 +70,14 @@ for SIZE in RANGE:
         y = train["labels"]
 
         for i in range(len(y)):
-            if(len(y_train)==TRAININGSIZE*NUMBEROFLABELS):
+            if(len(y_train)==TRAININGSIZE*DSUM):
                 break
             if(y[i] in labels):
-                if(y_train.count(y[i])<=TRAININGSIZE):
+                if(y_train.count(y[i])<=TRAININGSIZE*dist[labels.index(y[i])]):
                     x_train.append(x[i])
                     y_train.append(y[i])
 
-        if(len(y_train)==TRAININGSIZE*NUMBEROFLABELS):
+        if(len(y_train)==TRAININGSIZE*DSUM):
             break
 
     x_train = np.array(x_train, float)
@@ -95,10 +102,10 @@ for SIZE in RANGE:
     y_test = []
 
     for i in range(len(y)):
-        if(len(y_test) == TESTSIZE*NUMBEROFLABELS):
+        if(len(y_test) == TESTSIZE*DSUM):
             break
         if(y[i] in labels):
-            if(y_test.count(y[i])<=TESTSIZE):
+            if(y_test.count(y[i])<=TESTSIZE*dist[labels.index(y[i])]):
                 x_test.append(x[i])
                 y_test.append(y[i])
 
@@ -122,6 +129,6 @@ for SIZE in RANGE:
 
     score.append(_)
 
-with open('score_CCIFC.dat','w') as outfile:
+with open('score.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write(str(RANGE[i]) + "\t" + str(score[i][0]) + "\t" + str(score[i][1]) + "\n"),
