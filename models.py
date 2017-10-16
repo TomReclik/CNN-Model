@@ -3,6 +3,7 @@ from keras.models import Model
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Activation, Input, advanced_activations
 from keras.layers import Conv2D, MaxPooling2D, AveragePooling2D
+from keras.layers.normalization import BatchNormalization
 from keras.optimizers import SGD, Adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras import metrics
@@ -658,13 +659,25 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Conv2D(192, (5,5), input_shape=(32,32,3), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
     model.add(Conv2D(160, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
     model.add(Conv2D(96, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    #model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
@@ -672,13 +685,25 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Conv2D(192, (5,5), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
     model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
     model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
 
     model.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
 
@@ -686,13 +711,25 @@ def EERACN(x_train, y_train, x_test, y_test, NOL):
 
     model.add(Conv2D(192, (3,3), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
     model.add(Conv2D(192, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
     model.add(Conv2D(10, (1,1), kernel_initializer='he_normal',
                 bias_initializer='zeros'))
-    model.add(advanced_activations.LeakyReLU(alpha=0.31))
+
+    model.add(BatchNormalization(axis=3))
+
+    # model.add(advanced_activations.LeakyReLU(alpha=0.31))
+    model.add(advanced_activations.ELU())
 
     model.add(AveragePooling2D(pool_size=(8,8), strides=(1,1), padding='same'))
 

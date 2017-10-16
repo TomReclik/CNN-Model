@@ -18,19 +18,13 @@ flags.DEFINE_string('CenterGrayScale', 'True', 'Center the gray scale to the int
 
 FLAGS = flags.FLAGS
 
-
-"""
-Get data
-"""
-
 labels = [0,1,2,3,4,5]
-
-dist = [0.0799,0.1076,0.4132,0.0035,0.3229,0.0729]
 
 #
 # All categarozies equally often
 #
-# dist = [1./len(labels)] * len(labels)
+dist = [1./len(labels)] * len(labels)
+# dist = [0.0799,0.1076,0.4132,0.0035,0.3229,0.0729]
 
 DSUM = sum(dist)
 
@@ -40,15 +34,23 @@ score = []
 # Low number of examples range
 #
 
-low = range(500,5000,500)
+# low = range(500,5100,500)
 
 #
 # High number of examples range
 #
+#
+# high = range(5000,26000,5000)
+#
+# RANGE = low+high
 
-high = range(5000,26000,5000)
+RANGE = [5000]
 
-RANGE = low+high
+#
+# Number of repetitions for statistical evaluation
+#
+
+NOR = 20
 
 for SIZE in RANGE:
     #
@@ -125,10 +127,27 @@ for SIZE in RANGE:
     # _ = models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
     # _ = models.Lenet(x_train, y_train, x_test, y_test)
     # _ = models.CCIFC(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
-    _ = models.EERACN(x_train, y_train, x_test, y_test, NUMBEROFLABELS)
 
+    _ = []
+    for i in range(NOR):
+        _.append(models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS))
+
+    print _[0]
     score.append(_)
 
-with open('score.dat','w') as outfile:
+with open('Graham_Simple_stat.dat','w') as outfile:
     for i in range(len(score)):
-        outfile.write(str(RANGE[i]) + "\t" + str(score[i][0]) + "\t" + str(score[i][1]) + "\n"),
+        outfile.write("Number of training data: " + str(RANGE[i]) + "\n")
+        outfile.write("Loss: ")
+        for j in range(len(score[i])):
+            outfile.write("%f" %score[i][j][0])
+            if(j<len(score[i])-1):
+                outfile.write(", ")
+        outfile.write("\n")
+
+        outfile.write("Accuracy: ")
+        for j in range(len(score[i])):
+            outfile.write("%f" %score[i][j][1])
+            if(j<len(score[i])-1):
+                outfile.write(", ")
+        outfile.write("\n")
