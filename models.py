@@ -15,13 +15,13 @@ import tensorflow as tf
 def ClassicalCNN(x_train, y_train, x_test, y_test, NOL):
     model = Sequential()
 
-    model.add(Conv2D(64, (3,3), input_shape=(32,32,3),
+    model.add(Conv2D(32, (3,3), input_shape=(32,32,3),
                 activation=advanced_activations.LeakyReLU(alpha=0.18),
                 kernel_initializer='he_normal', bias_initializer='zeros'))
     model.add(MaxPooling2D(pool_size=(2,2)))
-    model.add(Conv2D(128, (3,3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+    model.add(Conv2D(64, (3,3), activation=advanced_activations.LeakyReLU(alpha=0.18),
                 kernel_initializer='he_normal', bias_initializer='zeros'))
-    model.add(Conv2D(128, (3,3), activation=advanced_activations.LeakyReLU(alpha=0.18),
+    model.add(Conv2D(64, (3,3), activation=advanced_activations.LeakyReLU(alpha=0.18),
                 kernel_initializer='he_normal', bias_initializer='zeros'))
     model.add(MaxPooling2D(pool_size=(2,2)))
 
@@ -46,7 +46,7 @@ def ClassicalCNN(x_train, y_train, x_test, y_test, NOL):
         #          write_graph=False,
         #          write_images=False)
     ]
-    model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2)
+    model.fit(x_train, y_train, batch_size=50, epochs=150, callbacks = callbacks, validation_split=0.2, verbose=0)
     score = model.evaluate(x_test, y_test, batch_size=50)
 
     return score

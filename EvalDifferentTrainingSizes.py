@@ -4,6 +4,7 @@ import os
 import keras
 import json
 import tensorflow as tf
+from PIL import Image
 
 import models
 import DifferentStructures
@@ -34,7 +35,8 @@ score = []
 # Low number of examples range
 #
 
-# low = range(500,5100,500)
+low = range(500,5100,500)
+# low = [5000]
 
 #
 # High number of examples range
@@ -44,7 +46,7 @@ score = []
 #
 # RANGE = low+high
 
-RANGE = [5000]
+RANGE = low
 
 #
 # Number of repetitions for statistical evaluation
@@ -88,6 +90,7 @@ for SIZE in RANGE:
     x_train = np.reshape(x_train,(len(x_train),3,32,32))
     x_train = np.transpose(x_train,(0,3,1,2))
     x_train = np.transpose(x_train,(0,1,3,2))
+
     if(FLAGS.CenterGrayScale):
         x_train = x_train*2./255. - 1.
     else:
@@ -117,6 +120,7 @@ for SIZE in RANGE:
     x_test = np.reshape(x_test,(len(x_test),3,32,32))
     x_test = np.transpose(x_test,(0,3,1,2))
     x_test = np.transpose(x_test,(0,1,3,2))
+
     if(FLAGS.CenterGrayScale):
         x_test = x_test*2./255. - 1.
     else:
@@ -130,12 +134,14 @@ for SIZE in RANGE:
 
     _ = []
     for i in range(NOR):
-        _.append(models.Graham_Simple(x_train, y_train, x_test, y_test, NUMBEROFLABELS))
+        print("\n")
+        print("REPETITION #%u" % i)
+        print("\n")
+        _.append(models.ClassicalCNN(x_train, y_train, x_test, y_test, NUMBEROFLABELS))
 
-    print _[0]
     score.append(_)
 
-with open('Graham_Simple_stat.dat','w') as outfile:
+with open('ClassicalCNN_32_64_stat.dat','w') as outfile:
     for i in range(len(score)):
         outfile.write("Number of training data: " + str(RANGE[i]) + "\n")
         outfile.write("Loss: ")
