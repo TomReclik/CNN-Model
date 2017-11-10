@@ -11,6 +11,7 @@ import os
 import dill as pickle
 import matplotlib.pyplot as plt
 from sklearn.utils import shuffle
+from keras.engine.topology import Layer
 
 def W_init(shape,name=None):
     """Initialize weights as in paper"""
@@ -21,6 +22,26 @@ def b_init(shape,name=None):
     """Initialize bias as in paper"""
     values=rng.normal(loc=0.5,scale=1e-2,size=shape)
     return K.variable(values,name=name)
+
+class siamese_network:
+    """
+    Creates a siamese network given an initial network
+    """
+
+    def __init__(self, network):
+        """
+        Create two copies of network and connect them at the top
+        """
+        input_shape = (32, 32, 3)
+        left_input = Input(input_shape)
+        right_input = Input(input_shape)
+
+        encoded_l = network(left_input)
+        encoded_r = network(right_input)
+
+        L1_distance = lambda x: K.abs(x[0]-x[1])
+        both = merge([encoded_l, encoded_r], mode=L1_distance, output_shape=lambda x:x[0])
+        prediction = Dense(1, activation='sigmoid',bias_initializer=)
 
 def siamese_convnet():
     input_shape = (32, 32, 3)
@@ -157,3 +178,26 @@ def siamese_EERACN():
     siamese_net.compile(loss="binary_crossentropy",optimizer=optimizer,metrics=['accuracy'])
 
     return siamese_net
+
+class MergeDif(Layer):
+
+    def __init__(self, output_dim, W_regularizer=None, **kwargs):
+        self.output_dim = 1
+        super(MergeDif, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+
+        self.kernel = self.add_weight(name='kernel',
+                                      shape=(input_shape[1], self.output_dim),
+                                      initializer='uniform',
+                                      trainable=True)
+        super(MergeDif, self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, x):
+        diff = np.fabs(x[0]-x[1])
+        out =
+        return K.dot(x, self.kernel)
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], self.output_dim)

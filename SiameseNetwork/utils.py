@@ -172,7 +172,7 @@ class Siamese_Loader:
         return (pairs,targets)
 
     def get_validation_batch(self,n,s="test"):
-
+        
         x = self.data[s]
         n_ex = x.shape[1]
         C1 = [random.choice(range(self.n_classes)) for i in range(n)]

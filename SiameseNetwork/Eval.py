@@ -10,7 +10,8 @@ labels = [0,1,2,3,4]
 TRAININGSIZE = 1000
 EPOCHS = 100
 BATCHSIZE = 32
-EVAL = 100
+EVALUATE = 100
+VALSIZE = 100
 
 # (x_train,x_test) = utils.loadCIFAR10(TRAININGSIZE,labels,val_split=0.)
 #
@@ -35,10 +36,31 @@ loader = utils.Siamese_Loader(TRAININGSIZE,labels,os.getcwd() + "/../CIFAR-10")
 
 siamese = model.siamese_EERACN()
 
+for i in range(20000):
+    (pairs,targets) = loader.get_batch(BATCHSIZE)
+    siamese.train_on_batch(pairs,targets)
+
 (pairs, targets) = loader.get_validation_batch(10)
+prediction = siamese.predict(pairs,batch_size=10)
+
+print("Prediction: ")
+print(prediction)
+print("Correct: ")
+print(targets)
+
 #
-# for i in range(EPOCHS):
-#     (pairs,targets) = loader.get_batch(BATCHSIZE)
-#     siamese.train_on_batch(pairs, targets)
-#
-#
+# loop = 1
+# while True:
+#     (pairs,target) = loader.get_batch(BATCHSIZE)
+#     siamese.train_on_batch(pairs,targets)
+#     if loop%EVALUATE==0:
+#         (val_pair,val_target) = get_validation_batch(VALSIZE)
+#         acc = siamese.evaluate(val_pair, val_target)
+#         print(acc)
+#     loop += 1
+# #
+# # for i in range(EPOCHS):
+# #     (pairs,targets) = loader.get_batch(BATCHSIZE)
+# #     siamese.train_on_batch(pairs, targets)
+# #
+# #
