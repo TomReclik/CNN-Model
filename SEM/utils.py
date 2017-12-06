@@ -23,7 +23,15 @@ class SEM_loader:
 
         self.lang = lang
 
+        compressedLang = []
+        for key,value in lang.iteritems():
+            compressedLang.append(value)
+        compressedLang = set(compressedLang)
+        self.NOC = len(compressedLang)
+
         self.data = {}
+
+        IGNORE = [  "/home/tom/Data/LabeledDamages/CFK_def13_rep_1_2017-08-31"]
 
         ##
         ## Get subfolders
@@ -32,10 +40,15 @@ class SEM_loader:
         subfolders = [x[0] for x in os.walk(path)]
         subfolders = subfolders[1:]
 
+        for ign in IGNORE:
+            subfolders.remove(ign)
+        # subfolders = [IGNORE]
+
         x = []
         y = []
 
         for folder in subfolders:
+            print "Reading", folder
             for PATH_XML in os.listdir(folder):
                 if PATH_XML.endswith(".xml"):
                     PATH_IMG = folder + "/" + PATH_XML[0:-4] + ".png"
@@ -105,10 +118,16 @@ class SEM_loader:
                                 x.append(tmp)
                                 y.append(lang[category])
 
+        for key, value in lang.iteritems():
+            print key, ": ", y.count(value)
+
+        print "Size of the data set: ", len(y)
+
         x = np.asarray(x, float)
         y = np.asarray(y, int)
 
-        y = keras.utils.to_categorical(y, len(lang))
+        y = keras.utils.to_categorical(y, self.NOC)
+        # y = keras.utils.to_categorical(y, len(lang))
 
         self.data = x
         self.label = y
@@ -140,3 +159,21 @@ class SEM_loader:
 
     def getLang(self):
         return self.lang
+
+def TrueNegatives(n_out,y_true,threshold):
+    """
+    Calculate the number of true negatives
+    Input:
+        n_out:      Output of the CNN (softmax)
+        y_true:     True labels
+        threshold:  Threshold above which to decide for the true case
+    """
+
+    n_out = n_out[:,0]
+    y_true = y_true[:,0]
+
+    y_pred = np.greater(n_out,threshold)
+
+    correct = np.logical_and(y_pred, y_true)
+
+    return y_true.shape[0]-np.count_nonzero(correct)

@@ -57,6 +57,7 @@ def conv2d_bn(x,
     Returns:
         Output tensor after applying `Conv2D` and `BatchNormalization`.
     """
+
     if name is not None:
         bn_name = name + '_bn'
         conv_name = name + '_conv'
