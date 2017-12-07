@@ -31,7 +31,7 @@ class SEM_loader:
 
         self.data = {}
 
-        IGNORE = [  "/home/tom/Data/LabeledDamages/CFK_def13_rep_1_2017-08-31"]
+        IGNORE = ["/home/tom/Data/LabeledDamages/CFK_def13_rep_1_2017-08-31"]
 
         ##
         ## Get subfolders
@@ -133,7 +133,7 @@ class SEM_loader:
         self.label = y
         self.shape = size
 
-    def getData(self, split):
+    def getData(self, split, dist=None):
         """
         Get the data and split it into training and test sets
         Input:

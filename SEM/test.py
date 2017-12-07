@@ -9,8 +9,8 @@ import numpy as np
 #lang = {"Martensite":0, "Interface":1, "Boundary":2, "Evolved":3}
 # lang = {"Martensite":0, "Interface":1, "Evolved":2, "Evovled":2, "Notch":2}
 # lang = {"Martensite":0, "Interface":1}
-lang = {"Evolved":0, "Evovled":0, "Notch":0, "Martensite":1, "Boundary":1, "Interface":1}
-
+lang = {"Martensite":0,"Interface":1, "Notch":2}
+class_weight = {0:1,1:1,2:2}
 
 compressedLang = []
 for key,value in lang.iteritems():
@@ -24,7 +24,7 @@ batch_size = 10
 
 print "Loading Data"
 
-loader = utils.SEM_loader(lang,[200,200],"/home/tom/Data/LabeledDamages/")
+loader = utils.SEM_loader(lang,[100,100],"/home/tom/Data/LabeledDamages/")
 
 x_train, y_train, x_test, y_test = loader.getData(0.2)
 
@@ -53,7 +53,7 @@ callbacks = [
     ]
 
 network.fit(x_train, y_train, batch_size=batch_size, epochs=150,
-            callbacks = callbacks, validation_split=0.2, class_weight={0:1, 1:2})
+            callbacks = callbacks, validation_split=0.2, class_weight=class_weight)
 
 network.load_weights(weights_path)
 
@@ -61,53 +61,86 @@ score = network.evaluate(x_test, y_test, batch_size=batch_size)
 
 print "Accuracy on the entire test batch: ", score[1]
 
-# pred = network.predict(x_test)
-
-# TN = utils.TrueNegatives(pred,y_test,0.7)
-
-# print TN, "of ", y_test.shape[0]
-
-
-
 ##
 ## Test accuracy on the subclasses
 ##
 
-M = []
-y_M = []
+inv_lang = {v: k for k,v in lang.iteritems()}
 
-ID = []
-y_ID = []
-
-# I = []
-# y_I= []
+x = [[] for i in range(NOC)]
+y = [[] for i in range(NOC)]
 
 for i in range(y_test.shape[0]):
-    if y_test[i][0] == 1:
-        M.append(x_test[i])
-        y_M.append(0)
-    elif y_test[i][1] == 1:
-        ID.append(x_test[i])
-        y_ID.append(1)
-    # else:
-    #     I.append(x_test[i])
-    #     y_I.append(2)
+    for j in range(NOC):
+        if y_test[i][j] == 1:
+            x[j].append(x_test[i])
+            y[j].append(j)
 
-M = np.asarray(M, float)
-y_M = np.asarray(y_M, int)
-y_M = keras.utils.to_categorical(y_M, NOC)
-score_M = network.evaluate(M, y_M, batch_size=batch_size)
-print "Accuracy on just the evolved test data: ", score_M[1]
+for i in range(NOC):
+    x_tmp = np.asarray(x[i], float)
+    y_tmp = np.asarray(y[i], int)
+    y_tmp = keras.utils.to_categorical(y_tmp, NOC)
+    score = network.evaluate(x_tmp, y_tmp, batch_size=batch_size, verbose=0)
+    print "Accuracy on just the ", inv_lang[i], "test data", score[1]
 
-ID = np.asarray(ID, float)
-y_ID = np.asarray(y_ID, int)
-y_ID = keras.utils.to_categorical(y_ID, NOC)
-score_ID = network.evaluate(ID, y_ID, batch_size=batch_size)
-print "Accuracy on just the not evolved test data: ", score_ID[1]
-
-
-# I = np.asarray(I, float)
-# y_I = np.asarray(y_I, int)
-# y_I = keras.utils.to_categorical(y_I, NOC)
-# score_I = network.evaluate(I, y_I, batch_size=batch_size)
-# print "Accuracy on just the Inclusion test data: ", score_I[1]
+#
+# M = []
+# y_M = []
+#
+# ID = []
+# y_ID = []
+#
+# # N = []
+# # y_N = []
+#
+# # B = []
+# # y_B = []
+# #
+#
+# for i in range(y_test.shape[0]):
+#     if y_test[i][0] == 1:
+#         M.append(x_test[i])
+#         y_M.append(0)
+#     elif y_test[i][1] == 1:
+#         ID.append(x_test[i])
+#         y_ID.append(1)
+#     # elif y_test[i][2] == 1:
+#     #     N.append(x_test[i])
+#     #     y_N.append(2)
+#     # elif y_test[i][2] == 1:
+#     #     B.append(x_test[i])
+#     #     y_B.append(2)
+#
+#     # else:
+#     #     I.append(x_test[i])
+#     #     y_I.append(2)
+#
+# M = np.asarray(M, float)
+# y_M = np.asarray(y_M, int)
+# y_M = keras.utils.to_categorical(y_M, NOC)
+# score_M = network.evaluate(M, y_M, batch_size=batch_size, verbose=0)
+# print "Accuracy on just the Interface test data: ", score_M[1]
+#
+# ID = np.asarray(ID, float)
+# y_ID = np.asarray(y_ID, int)
+# y_ID = keras.utils.to_categorical(y_ID, NOC)
+# score_ID = network.evaluate(ID, y_ID, batch_size=batch_size, verbose=0)
+# print "Accuracy on just the Notch test data: ", score_ID[1]
+#
+# # B = np.asarray(B, float)
+# # y_B = np.asarray(y_B, int)
+# # y_B = keras.utils.to_categorical(y_B, NOC)
+# # score_B = network.evaluate(B, y_B, batch_size=batch_size, verbose=0)
+# # print "Accuracy on just the Boundary test data: ", score_B[1]
+# #
+# # N = np.asarray(N, float)
+# # y_N = np.asarray(y_N, int)
+# # y_N = keras.utils.to_categorical(y_N, NOC)
+# # score_N = network.evaluate(N, y_N, batch_size=batch_size, verbose=0)
+# # print "Accuracy on just the Notch test data: ", score_N[1]
+#
+# # I = np.asarray(I, float)
+# # y_I = np.asarray(y_I, int)
+# # y_I = keras.utils.to_categorical(y_I, NOC)
+# # score_I = network.evaluate(I, y_I, batch_size=batch_size)
+# # print "Accuracy on just the Inclusion test data: ", score_I[1]
