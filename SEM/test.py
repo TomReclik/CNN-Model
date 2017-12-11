@@ -9,8 +9,10 @@ import numpy as np
 #lang = {"Martensite":0, "Interface":1, "Boundary":2, "Evolved":3}
 # lang = {"Martensite":0, "Interface":1, "Evolved":2, "Evovled":2, "Notch":2}
 # lang = {"Martensite":0, "Interface":1}
-lang = {"Martensite":0,"Interface":1, "Notch":2}
-class_weight = {0:1,1:1,2:2}
+# lang = {"Notch":0,"Interface":1}
+lang = {"Inclusion":0, "Notch":1, "Interface":1, "Martensite":1, "Evolved":1, "Boundary":1}
+class_weight = {0:1.5,1:1}
+dist = {"Inclusion":383, "Notch":100, "Interface":100, "Martensite":100, "Evolved":100, "Boundary":100}
 
 compressedLang = []
 for key,value in lang.iteritems():
@@ -18,15 +20,15 @@ for key,value in lang.iteritems():
 compressedLang = set(compressedLang)
 NOC = len(compressedLang)
 
-name = "EERACN_EvsAll_NoInc"
+name = "EERACN_IncVsAll_NoInc"
 weights_path = name + ".hdf5"
-batch_size = 10
+batch_size = 5
 
 print "Loading Data"
 
-loader = utils.SEM_loader(lang,[100,100],"/home/tom/Data/LabeledDamages/")
+loader = utils.SEM_loader([250,250],"/home/tom/Data/LabeledDamages/")
 
-x_train, y_train, x_test, y_test = loader.getData(0.2)
+x_train, y_train, x_test, y_test = loader.getData(lang,0.2,dist=dist)
 
 print "Initializing Network"
 
@@ -52,8 +54,8 @@ callbacks = [
         #          write_images=False)
     ]
 
-network.fit(x_train, y_train, batch_size=batch_size, epochs=150,
-            callbacks = callbacks, validation_split=0.2, class_weight=class_weight)
+#network.fit(x_train, y_train, batch_size=batch_size, epochs=150,
+#            callbacks = callbacks, validation_split=0.2, class_weight=class_weight)
 
 network.load_weights(weights_path)
 
@@ -82,6 +84,7 @@ for i in range(NOC):
     y_tmp = keras.utils.to_categorical(y_tmp, NOC)
     score = network.evaluate(x_tmp, y_tmp, batch_size=batch_size, verbose=0)
     print "Accuracy on just the ", inv_lang[i], "test data", score[1]
+    print x_tmp.shape
 
 #
 # M = []

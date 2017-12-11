@@ -12,7 +12,7 @@ class SEM_loader:
                 Load data of given size for a siamese network
     """
 
-    def __init__(self,lang,size,path):
+    def __init__(self,size,path):
         """
         Initializes data
         Input:
@@ -21,10 +21,12 @@ class SEM_loader:
             path:   path to to the folder containing subfolders with images
         """
 
-        self.lang = lang
+        self.lang = {   "Martensite":0,"Evolved":1,"Evovled":1,
+                        "Interface":2, "Notch":3, "Boundary":4,
+                        "Inclusion":5}
 
         compressedLang = []
-        for key,value in lang.iteritems():
+        for key,value in self.lang.iteritems():
             compressedLang.append(value)
         compressedLang = set(compressedLang)
         self.NOC = len(compressedLang)
@@ -41,7 +43,8 @@ class SEM_loader:
         subfolders = subfolders[1:]
 
         for ign in IGNORE:
-            subfolders.remove(ign)
+            if ign in subfolders:
+                subfolders.remove(ign)
         # subfolders = [IGNORE]
 
         x = []
@@ -69,11 +72,10 @@ class SEM_loader:
                             INTEREST = True
                             for bbox in ob:
                                 if bbox.tag == "name":
-                                    if not bbox.text in lang:
+                                    if not bbox.text in self.lang:
                                         INTEREST = False
                                         break
                                     else:
-                                        assert bbox.text in lang, "Category in xml file not in language. Problematic file: " + PATHXML
                                         category = bbox.text
                                 if bbox.tag == "bndbox":
                                     x1 = int(bbox[0].text)
@@ -116,9 +118,9 @@ class SEM_loader:
                                 tmp[:,:,0] = img[y1:y2,x1:x2]
                                 tmp = tmp*2./255. - 1.
                                 x.append(tmp)
-                                y.append(lang[category])
+                                y.append(self.lang[category])
 
-        for key, value in lang.iteritems():
+        for key, value in self.lang.iteritems():
             print key, ": ", y.count(value)
 
         print "Size of the data set: ", len(y)
@@ -126,32 +128,126 @@ class SEM_loader:
         x = np.asarray(x, float)
         y = np.asarray(y, int)
 
-        y = keras.utils.to_categorical(y, self.NOC)
+        # y = keras.utils.to_categorical(y, self.NOC)
         # y = keras.utils.to_categorical(y, len(lang))
 
         self.data = x
         self.label = y
         self.shape = size
+        self.N = y.shape[0]
 
-    def getData(self, split, dist=None):
+        self.lang = {   "Martensite":0,"Evolved":1, "Interface":2, "Notch":3, "Boundary":4,
+                        "Inclusion":5}
+        self.inv_lang = {v: k for k,v in self.lang.iteritems()}
+
+    def getData(self, lang, split, dist=None):
         """
         Get the data and split it into training and test sets
         Input:
+            lang:   which labels to use
             split:  split ratio between training and test sets
+            dist:   how many examples per class should be used
         """
 
         ##
         ## Number of examples
         ##
 
-        NOE = self.data.shape[0]
+        compressedLang = []
+        for key,value in lang.iteritems():
+            compressedLang.append(value)
+        compressedLang = set(compressedLang)
+        NOC = len(compressedLang)
 
-        perm = np.random.permutation(range(NOE))
+        inv_lang = {v: k for k,v in lang.iteritems()}
 
-        x_train = self.data[perm[0:int((1-split)*NOE)]]
-        y_train = self.label[perm[0:int((1-split)*NOE)]]
-        x_test = self.data[perm[int((1-split)*NOE):int(NOE)]]
-        y_test = self.label[perm[int((1-split)*NOE):int(NOE)]]
+        if dist!=None:
+
+            x_tmp = []
+            y_tmp = []
+
+            D = {k:0 for k,v in dist.iteritems()}   # Distribution at the moment
+            A = 0                                   # Number of data added
+            S = [v for k,v in dist.iteritems()]
+            S = sum(S)
+            B = 0                                   # Break parameter to prevent
+                                                    # entering a non ending loop
+
+            while A<S and B<self.N:
+                ##
+                ## Check if the label y[B] is of interest
+                ##
+                if self.inv_lang[self.label[B]] in lang:
+                    ##
+                    ## Translate the label to using the new dictionary lang
+                    ##
+                    label = lang[self.inv_lang[self.label[B]]]
+                    if D[self.inv_lang[self.label[B]]] < dist[self.inv_lang[self.label[B]]]:
+                        x_tmp.append(self.data[B])
+                        y_tmp.append(label)
+                        D[self.inv_lang[self.label[B]]] += 1
+                        A += 1
+                B += 1
+
+            for key, value in lang.iteritems():
+                print key, ": ", y_tmp.count(value)
+
+            x_tmp = np.asarray(x_tmp, float)
+            y_tmp = np.asarray(y_tmp, int)
+            y_tmp = keras.utils.to_categorical(y_tmp, NOC)
+
+            ##
+            ## Shuffle the data
+            ##
+            perm = np.random.permutation(range(A))
+            x_tmp = x_tmp[perm]
+            y_tmp = y_tmp[perm]
+
+            ##
+            ## Split data into training and testing data sets
+            ##
+            x_train = x_tmp[0:int((1-split)*A)]
+            y_train = y_tmp[0:int((1-split)*A)]
+            x_test = x_tmp[int((1-split)*A):A]
+            y_test = y_tmp[int((1-split)*A):A]
+
+            print x_train.shape
+            print y_train.shape
+            print x_test.shape
+            print y_test.shape
+
+        else:
+            A = 0
+            for i in range(self.N):
+                ##
+                ## Check if the label y[B] is of interest
+                ##
+                if self.inv_lang[self.label[i]] in lang:
+                    label = lang[self.inv_lang[self.label[i]]]
+                    x_tmp.append(self.data[i])
+                    y_tmp.append(label)
+                    A += 1
+
+            x_tmp = np.asarray(x_tmp, float)
+            y_tmp = np.asarray(y_tmp, int)
+
+            y_tmp = keras.utils.to_categorical(y_tmp, NOC)
+
+            ##
+            ## Shuffle the data
+            ##
+            perm = np.random.permutation(range(A))
+            x_tmp = x_tmp[perm]
+            y_tmp = y_tmp[perm]
+
+            ##
+            ## Split data into training and testing data sets
+            ##
+            x_train = x_tmp[0:int((1-split)*A)]
+            y_train = y_tmp[0:int((1-split)*A)]
+            x_test = x_tmp[int((1-split)*A):A]
+            y_test = y_tmp[int((1-split)*A):A]
+
         return x_train,y_train,x_test,y_test
 
     def getShape(self):
